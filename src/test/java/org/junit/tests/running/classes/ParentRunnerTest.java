@@ -1,15 +1,16 @@
 package org.junit.tests.running.classes;
 
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.testsupport.EventCollectorMatchers.*;
 
 import java.util.List;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,15 +20,14 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Request;
 import org.junit.runner.Result;
 import org.junit.runner.manipulation.Filter;
-import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.RunnerScheduler;
-import org.junit.tests.experimental.rules.RuleFieldValidatorTest.TestWithNonStaticClassRule;
-import org.junit.tests.experimental.rules.RuleFieldValidatorTest.TestWithProtectedClassRule;
+import org.junit.tests.experimental.rules.RuleMemberValidatorTest.TestWithNonStaticClassRule;
+import org.junit.tests.experimental.rules.RuleMemberValidatorTest.TestWithProtectedClassRule;
+import org.junit.testsupport.EventCollector;
 
 public class ParentRunnerTest {
     public static String log = "";
@@ -47,9 +47,10 @@ public class ParentRunnerTest {
     @Test
     public void useChildHarvester() throws InitializationError {
         log = "";
-        ParentRunner<?> runner = new BlockJUnit4ClassRunner(FruitTest.class);
+        final ParentRunner<?> runner = new BlockJUnit4ClassRunner(
+                FruitTest.class);
         runner.setScheduler(new RunnerScheduler() {
-            public void schedule(Runnable childStatement) {
+            public void schedule(final Runnable childStatement) {
                 log += "before ";
                 childStatement.run();
                 log += "after ";
@@ -66,24 +67,25 @@ public class ParentRunnerTest {
 
     @Test
     public void testMultipleFilters() throws Exception {
-        JUnitCore junitCore = new JUnitCore();
-        Request request = Request.aClass(ExampleTest.class);
-        Request requestFiltered = request.filterWith(new Exclude("test1"));
-        Request requestFilteredFiltered = requestFiltered
+        final JUnitCore junitCore = new JUnitCore();
+        final Request request = Request.aClass(ExampleTest.class);
+        final Request requestFiltered = request
+                .filterWith(new Exclude("test1"));
+        final Request requestFilteredFiltered = requestFiltered
                 .filterWith(new Exclude("test2"));
-        Result result = junitCore.run(requestFilteredFiltered);
+        final Result result = junitCore.run(requestFilteredFiltered);
         assertThat(result.getFailures(), isEmpty());
         assertEquals(1, result.getRunCount());
     }
 
     private Matcher<List<?>> isEmpty() {
         return new TypeSafeMatcher<List<?>>() {
-            public void describeTo(org.hamcrest.Description description) {
+            public void describeTo(final org.hamcrest.Description description) {
                 description.appendText("is empty");
             }
 
             @Override
-            public boolean matchesSafely(List<?> item) {
+            public boolean matchesSafely(final List<?> item) {
                 return item.size() == 0;
             }
         };
@@ -92,12 +94,12 @@ public class ParentRunnerTest {
     private static class Exclude extends Filter {
         private final String methodName;
 
-        public Exclude(String methodName) {
+        public Exclude(final String methodName) {
             this.methodName = methodName;
         }
 
         @Override
-        public boolean shouldRun(Description description) {
+        public boolean shouldRun(final Description description) {
             return !description.getMethodName().equals(methodName);
         }
 
@@ -145,11 +147,13 @@ public class ParentRunnerTest {
                 "The class org.junit.tests.running.classes.ParentRunnerTest$NonPublicTestClass is not public.");
     }
 
-    private void assertClassHasFailureMessage(Class<?> klass, String message) {
-        JUnitCore junitCore = new JUnitCore();
-        Request request = Request.aClass(klass);
-        Result result = junitCore.run(request);
-        assertThat(result.getFailureCount(), is(2)); //the second failure is no runnable methods
+    private void assertClassHasFailureMessage(final Class<?> klass,
+            final String message) {
+        final JUnitCore junitCore = new JUnitCore();
+        final Request request = Request.aClass(klass);
+        final Result result = junitCore.run(request);
+        assertThat(result.getFailureCount(), is(2)); // the second failure is no
+                                                     // runnable methods
         assertThat(result.getFailures().get(0).getMessage(),
                 is(equalTo(message)));
     }
@@ -161,17 +165,18 @@ public class ParentRunnerTest {
         }
 
         @Test
-        public void test() {}
+        public void test() {
+        }
     }
 
     @Test
     public void assertionErrorAtParentLevelTest() throws InitializationError {
-        CountingRunListener countingRunListener = runTestWithParentRunner(AssertionErrorAtParentLevelTest.class);
-        Assert.assertEquals(0, countingRunListener.testStarted);
-        Assert.assertEquals(0, countingRunListener.testFinished);
-        Assert.assertEquals(1, countingRunListener.testFailure);
-        Assert.assertEquals(0, countingRunListener.testAssumptionFailure);
-        Assert.assertEquals(0, countingRunListener.testIgnored);
+        final EventCollector collector = runTestWithParentRunner(AssertionErrorAtParentLevelTest.class);
+        assertThat(
+                collector,
+                allOf(hasNoAssumptionFailure(), hasSingleFailure(),
+                        hasNumberOfTestsIgnored(0),
+                        hasNumberOfTestsFinished(0), hasNumberOfTestsStarted(0)));
     }
 
     public static class AssumptionViolatedAtParentLevelTest {
@@ -181,22 +186,24 @@ public class ParentRunnerTest {
         }
 
         @Test
-        public void test() {}
+        public void test() {
+        }
     }
 
     @Test
     public void assumptionViolatedAtParentLevel() throws InitializationError {
-        CountingRunListener countingRunListener = runTestWithParentRunner(AssumptionViolatedAtParentLevelTest.class);
-        Assert.assertEquals(0, countingRunListener.testStarted);
-        Assert.assertEquals(0, countingRunListener.testFinished);
-        Assert.assertEquals(0, countingRunListener.testFailure);
-        Assert.assertEquals(1, countingRunListener.testAssumptionFailure);
-        Assert.assertEquals(0, countingRunListener.testIgnored);
+        final EventCollector collector = runTestWithParentRunner(AssumptionViolatedAtParentLevelTest.class);
+        assertThat(
+                collector,
+                allOf(hasSingleAssumptionFailure(), hasNoFailure(),
+                        hasNumberOfTestsIgnored(0),
+                        hasNumberOfTestsFinished(0), hasNumberOfTestsStarted(0)));
     }
 
     public static class TestTest {
         @Test
-        public void pass() {}
+        public void pass() {
+        }
 
         @Test
         public void fail() {
@@ -205,7 +212,8 @@ public class ParentRunnerTest {
 
         @Ignore
         @Test
-        public void ignore() {}
+        public void ignore() {
+        }
 
         @Test
         public void assumptionFail() {
@@ -215,53 +223,21 @@ public class ParentRunnerTest {
 
     @Test
     public void parentRunnerTestMethods() throws InitializationError {
-        CountingRunListener countingRunListener = runTestWithParentRunner(TestTest.class);
-        Assert.assertEquals(3, countingRunListener.testStarted);
-        Assert.assertEquals(3, countingRunListener.testFinished);
-        Assert.assertEquals(1, countingRunListener.testFailure);
-        Assert.assertEquals(1, countingRunListener.testAssumptionFailure);
-        Assert.assertEquals(1, countingRunListener.testIgnored);
+        final EventCollector collector = runTestWithParentRunner(TestTest.class);
+        assertThat(
+                collector,
+                allOf(hasSingleAssumptionFailure(), hasSingleFailure(),
+                        hasNumberOfTestsIgnored(1),
+                        hasNumberOfTestsFinished(3), hasNumberOfTestsStarted(3)));
     }
 
-    private CountingRunListener runTestWithParentRunner(Class<?> testClass) throws InitializationError {
-        CountingRunListener listener = new CountingRunListener();
-        RunNotifier runNotifier = new RunNotifier();
-        runNotifier.addListener(listener);
-        ParentRunner runner = new BlockJUnit4ClassRunner(testClass);
+    private EventCollector runTestWithParentRunner(final Class<?> testClass)
+            throws InitializationError {
+        final EventCollector collector = new EventCollector();
+        final RunNotifier runNotifier = new RunNotifier();
+        runNotifier.addListener(collector);
+        final ParentRunner runner = new BlockJUnit4ClassRunner(testClass);
         runner.run(runNotifier);
-        return listener;
-    }
-
-    private static class CountingRunListener extends RunListener {
-        private int testStarted = 0;
-        private int testFinished = 0;
-        private int testFailure = 0;
-        private int testAssumptionFailure = 0;
-        private int testIgnored = 0;
-
-        @Override
-        public void testStarted(Description description) throws Exception {
-            testStarted++;
-        }
-
-        @Override
-        public void testFinished(Description description) throws Exception {
-            testFinished++;
-        }
-
-        @Override
-        public void testFailure(Failure failure) throws Exception {
-            testFailure++;
-        }
-
-        @Override
-        public void testAssumptionFailure(Failure failure) {
-            testAssumptionFailure++;
-        }
-
-        @Override
-        public void testIgnored(Description description) throws Exception {
-            testIgnored++;
-        }
+        return collector;
     }
 }

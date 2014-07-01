@@ -8,7 +8,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -25,8 +24,8 @@ import org.junit.runner.Result;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
 import org.junit.runner.notification.Failure;
-import org.junit.runner.notification.RunListener;
 import org.junit.tests.AllTests;
+import org.junit.testsupport.EventCollector;
 
 public class MaxStarterTest {
     private MaxCore fMax;
@@ -60,11 +59,11 @@ public class MaxStarterTest {
 
     @Test
     public void twoTestsNotRunComeBackInRandomOrder() {
-        Request request = Request.aClass(TwoTests.class);
-        List<Description> things = fMax.sortedLeavesForTest(request);
-        Description succeed = Description.createTestDescription(TwoTests.class,
+        final Request request = Request.aClass(TwoTests.class);
+        final List<Description> things = fMax.sortedLeavesForTest(request);
+        final Description succeed = Description.createTestDescription(TwoTests.class,
                 "succeed");
-        Description dontSucceed = Description.createTestDescription(
+        final Description dontSucceed = Description.createTestDescription(
                 TwoTests.class, "dontSucceed");
         assertTrue(things.contains(succeed));
         assertTrue(things.contains(dontSucceed));
@@ -73,11 +72,11 @@ public class MaxStarterTest {
 
     @Test
     public void preferNewTests() {
-        Request one = Request.method(TwoTests.class, "succeed");
+        final Request one = Request.method(TwoTests.class, "succeed");
         fMax.run(one);
-        Request two = Request.aClass(TwoTests.class);
-        List<Description> things = fMax.sortedLeavesForTest(two);
-        Description dontSucceed = Description.createTestDescription(
+        final Request two = Request.aClass(TwoTests.class);
+        final List<Description> things = fMax.sortedLeavesForTest(two);
+        final Description dontSucceed = Description.createTestDescription(
                 TwoTests.class, "dontSucceed");
         assertEquals(dontSucceed, things.get(0));
         assertEquals(2, things.size());
@@ -90,11 +89,11 @@ public class MaxStarterTest {
     // which order they run, you just want them both to be early in the sequence
     @Test
     public void preferNewTestsOverTestsThatFailed() {
-        Request one = Request.method(TwoTests.class, "dontSucceed");
+        final Request one = Request.method(TwoTests.class, "dontSucceed");
         fMax.run(one);
-        Request two = Request.aClass(TwoTests.class);
-        List<Description> things = fMax.sortedLeavesForTest(two);
-        Description succeed = Description.createTestDescription(TwoTests.class,
+        final Request two = Request.aClass(TwoTests.class);
+        final List<Description> things = fMax.sortedLeavesForTest(two);
+        final Description succeed = Description.createTestDescription(TwoTests.class,
                 "succeed");
         assertEquals(succeed, things.get(0));
         assertEquals(2, things.size());
@@ -102,21 +101,21 @@ public class MaxStarterTest {
 
     @Test
     public void preferRecentlyFailed() {
-        Request request = Request.aClass(TwoTests.class);
+        final Request request = Request.aClass(TwoTests.class);
         fMax.run(request);
-        List<Description> tests = fMax.sortedLeavesForTest(request);
-        Description dontSucceed = Description.createTestDescription(
+        final List<Description> tests = fMax.sortedLeavesForTest(request);
+        final Description dontSucceed = Description.createTestDescription(
                 TwoTests.class, "dontSucceed");
         assertEquals(dontSucceed, tests.get(0));
     }
 
     @Test
     public void sortTestsInMultipleClasses() {
-        Request request = Request.classes(Computer.serial(), TwoTests.class,
+        final Request request = Request.classes(Computer.serial(), TwoTests.class,
                 TwoTests.class);
         fMax.run(request);
-        List<Description> tests = fMax.sortedLeavesForTest(request);
-        Description dontSucceed = Description.createTestDescription(
+        final List<Description> tests = fMax.sortedLeavesForTest(request);
+        final Description dontSucceed = Description.createTestDescription(
                 TwoTests.class, "dontSucceed");
         assertEquals(dontSucceed, tests.get(0));
         assertEquals(dontSucceed, tests.get(1));
@@ -140,8 +139,8 @@ public class MaxStarterTest {
     public void rememberOldRuns() {
         fMax.run(TwoUnEqualTests.class);
 
-        MaxCore reincarnation = MaxCore.storedLocally(fMaxFile);
-        List<Failure> failures = reincarnation.run(TwoUnEqualTests.class)
+        final MaxCore reincarnation = MaxCore.storedLocally(fMaxFile);
+        final List<Failure> failures = reincarnation.run(TwoUnEqualTests.class)
                 .getFailures();
         assertEquals("fast", failures.get(0).getDescription().getMethodName());
         assertEquals("slow", failures.get(1).getDescription().getMethodName());
@@ -149,9 +148,9 @@ public class MaxStarterTest {
 
     @Test
     public void preferFast() {
-        Request request = Request.aClass(TwoUnEqualTests.class);
+        final Request request = Request.aClass(TwoUnEqualTests.class);
         fMax.run(request);
-        Description thing = fMax.sortedLeavesForTest(request).get(1);
+        final Description thing = fMax.sortedLeavesForTest(request).get(1);
         assertEquals(Description.createTestDescription(TwoUnEqualTests.class,
                 "slow"), thing);
     }
@@ -159,22 +158,17 @@ public class MaxStarterTest {
     @Test
     public void listenersAreCalledCorrectlyInTheFaceOfFailures()
             throws Exception {
-        JUnitCore core = new JUnitCore();
-        final List<Failure> failures = new ArrayList<Failure>();
-        core.addListener(new RunListener() {
-            @Override
-            public void testRunFinished(Result result) throws Exception {
-                failures.addAll(result.getFailures());
-            }
-        });
+        final EventCollector listener = new EventCollector();
+        final JUnitCore core = new JUnitCore();
+        core.addListener(listener);
         fMax.run(Request.aClass(TwoTests.class), core);
-        assertEquals(1, failures.size());
+        assertEquals(1, listener.getTestRunsFinished().get(0).getFailureCount());
     }
 
     @Test
     public void testsAreOnlyIncludedOnceWhenExpandingForSorting()
             throws Exception {
-        Result result = fMax.run(Request.aClass(TwoTests.class));
+        final Result result = fMax.run(Request.aClass(TwoTests.class));
         assertEquals(2, result.getRunCount());
     }
 
@@ -188,7 +182,7 @@ public class MaxStarterTest {
 
     @Test
     public void junit3TestsAreRunOnce() throws Exception {
-        Result result = fMax.run(Request.aClass(TwoOldTests.class),
+        final Result result = fMax.run(Request.aClass(TwoOldTests.class),
                 new JUnitCore());
         assertEquals(2, result.getRunCount());
     }
@@ -197,8 +191,8 @@ public class MaxStarterTest {
     public void filterSingleMethodFromOldTestClass() throws Exception {
         final Description method = Description.createTestDescription(
                 TwoOldTests.class, "testOne");
-        Filter filter = Filter.matchMethodDescription(method);
-        JUnit38ClassRunner child = new JUnit38ClassRunner(TwoOldTests.class);
+        final Filter filter = Filter.matchMethodDescription(method);
+        final JUnit38ClassRunner child = new JUnit38ClassRunner(TwoOldTests.class);
         child.filter(filter);
         assertEquals(1, child.testCount());
     }
@@ -208,11 +202,11 @@ public class MaxStarterTest {
         assertFilterLeavesTestUnscathed(AllTests.class);
     }
 
-    private void assertFilterLeavesTestUnscathed(Class<?> testClass) {
-        Request oneClass = Request.aClass(testClass);
-        Request filtered = oneClass.filterWith(new Filter() {
+    private void assertFilterLeavesTestUnscathed(final Class<?> testClass) {
+        final Request oneClass = Request.aClass(testClass);
+        final Request filtered = oneClass.filterWith(new Filter() {
             @Override
-            public boolean shouldRun(Description description) {
+            public boolean shouldRun(final Description description) {
                 return true;
             }
 
@@ -222,8 +216,8 @@ public class MaxStarterTest {
             }
         });
 
-        int filterCount = filtered.getRunner().testCount();
-        int coreCount = oneClass.getRunner().testCount();
+        final int filterCount = filtered.getRunner().testCount();
+        final int coreCount = oneClass.getRunner().testCount();
         assertEquals("Counts match up in " + testClass, coreCount, filterCount);
     }
 
@@ -238,7 +232,7 @@ public class MaxStarterTest {
 
     @Test
     public void maxShouldSkipMalformedJUnit38Classes() {
-        Request request = Request.aClass(MalformedJUnit38Test.class);
+        final Request request = Request.aClass(MalformedJUnit38Test.class);
         fMax.run(request);
     }
 
@@ -248,17 +242,16 @@ public class MaxStarterTest {
         }
     }
 
-    String fMessage = null;
-
     @Test
     public void correctErrorFromMalformedTest() {
-        Request request = Request.aClass(MalformedJUnit38TestMethod.class);
-        JUnitCore core = new JUnitCore();
-        Request sorted = fMax.sortRequest(request);
-        Runner runner = sorted.getRunner();
-        Result result = core.run(runner);
-        Failure failure = result.getFailures().get(0);
-        assertThat(failure.toString(), containsString("MalformedJUnit38TestMethod"));
+        final Request request = Request.aClass(MalformedJUnit38TestMethod.class);
+        final JUnitCore core = new JUnitCore();
+        final Request sorted = fMax.sortRequest(request);
+        final Runner runner = sorted.getRunner();
+        final Result result = core.run(runner);
+        final Failure failure = result.getFailures().get(0);
+        assertThat(failure.toString(),
+                containsString("MalformedJUnit38TestMethod"));
         assertThat(failure.toString(), containsString("testNothing"));
         assertThat(failure.toString(), containsString("isn't public"));
     }
@@ -278,16 +271,16 @@ public class MaxStarterTest {
                 .getFailureCount(), is(1));
     }
 
-
     @Test
     public void correctErrorFromHalfMalformedTest() {
-        Request request = Request.aClass(HalfMalformedJUnit38TestMethod.class);
-        JUnitCore core = new JUnitCore();
-        Request sorted = fMax.sortRequest(request);
-        Runner runner = sorted.getRunner();
-        Result result = core.run(runner);
-        Failure failure = result.getFailures().get(0);
-        assertThat(failure.toString(), containsString("MalformedJUnit38TestMethod"));
+        final Request request = Request.aClass(HalfMalformedJUnit38TestMethod.class);
+        final JUnitCore core = new JUnitCore();
+        final Request sorted = fMax.sortRequest(request);
+        final Runner runner = sorted.getRunner();
+        final Result result = core.run(runner);
+        final Failure failure = result.getFailures().get(0);
+        assertThat(failure.toString(),
+                containsString("MalformedJUnit38TestMethod"));
         assertThat(failure.toString(), containsString("testNothing"));
         assertThat(failure.toString(), containsString("isn't public"));
     }
