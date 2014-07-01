@@ -18,15 +18,12 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.junit.runners.model.FrameworkFieldTest;
 import org.junit.runners.model.FrameworkMethodTest;
-import org.junit.runners.model.TestClassTest;
-import org.junit.runners.parameterized.ParameterizedNamesTest;
-import org.junit.runners.parameterized.TestWithParametersTest;
 import org.junit.tests.assertion.AssertionTest;
 import org.junit.tests.assertion.ComparisonFailureTest;
 import org.junit.tests.assertion.MultipleFailureExceptionTest;
+import org.junit.tests.deprecated.JUnit4ClassRunnerTest;
 import org.junit.tests.description.AnnotatedDescriptionTest;
 import org.junit.tests.description.SuiteDescriptionTest;
-import org.junit.tests.description.TestDescriptionMethodNameTest;
 import org.junit.tests.description.TestDescriptionTest;
 import org.junit.tests.experimental.AssumptionTest;
 import org.junit.tests.experimental.ExperimentalTests;
@@ -88,123 +85,73 @@ import org.junit.tests.running.classes.ParentRunnerFilteringTest;
 import org.junit.tests.running.classes.ParentRunnerTest;
 import org.junit.tests.running.classes.RunWithTest;
 import org.junit.tests.running.classes.SuiteTest;
+import org.junit.tests.running.classes.TestClassTest;
 import org.junit.tests.running.classes.UseSuiteAsASuperclassTest;
 import org.junit.tests.running.core.CommandLineTest;
 import org.junit.tests.running.core.JUnitCoreReturnsCorrectExitCodeTest;
 import org.junit.tests.running.core.SystemExitTest;
 import org.junit.tests.running.methods.AnnotationTest;
+import org.junit.tests.running.methods.CustomTimeoutTest;
 import org.junit.tests.running.methods.ExpectedTest;
 import org.junit.tests.running.methods.InheritedTestTest;
 import org.junit.tests.running.methods.ParameterizedTestMethodTest;
 import org.junit.tests.running.methods.TestMethodTest;
 import org.junit.tests.running.methods.TimeoutTest;
+import org.junit.tests.validation.BadlyFormedClassesTest;
 import org.junit.tests.validation.FailedConstructionTest;
+import org.junit.tests.validation.InaccessibleBaseClassTest;
 import org.junit.tests.validation.ValidationTest;
-import org.junit.validator.PublicClassValidatorTest;
 
 // These test files need to be cleaned. See
 // https://sourceforge.net/pm/task.php?func=detailtask&project_task_id=136507&group_id=15278&group_project_id=51407
 
+@SuppressWarnings("deprecation")
 @RunWith(Suite.class)
-@SuiteClasses({
-        AssumptionTest.class,
-        ClassRequestTest.class,
-        ListenerTest.class,
-        FailedConstructionTest.class,
-        TestDescriptionTest.class,
-        TestDescriptionMethodNameTest.class,
-        SuiteDescriptionTest.class,
-        AllTestsTest.class,
-        AnnotationTest.class,
-        AssertionTest.class,
-        CommandLineTest.class,
-        ExpectedTest.class,
-        ComparisonFailureTest.class,
-        MultipleFailureExceptionTest.class,
-        ForwardCompatibilityTest.class,
-        OldTests.class,
-        ParameterizedTestTest.class,
-        RunWithTest.class,
-        RunnerTest.class,
-        SuiteTest.class,
-        TestListenerTest.class,
-        TestMethodTest.class,
-        TextListenerTest.class,
-        TimeoutTest.class,
-        EnclosedTest.class,
+@SuiteClasses({ AssumptionTest.class, ClassRequestTest.class,
+        ListenerTest.class, FailedConstructionTest.class,
+        TestDescriptionTest.class, SuiteDescriptionTest.class,
+        AllTestsTest.class, AnnotationTest.class, AssertionTest.class,
+        CommandLineTest.class, ExpectedTest.class, ComparisonFailureTest.class,
+        MultipleFailureExceptionTest.class, ForwardCompatibilityTest.class,
+        OldTests.class, ParameterizedTestTest.class, RunWithTest.class,
+        RunnerTest.class, SuiteTest.class, TestListenerTest.class,
+        TestMethodTest.class, TextListenerTest.class, TimeoutTest.class,
+        CustomTimeoutTest.class, EnclosedTest.class,
         ParameterizedTestMethodTest.class,
         InitializationErrorForwardCompatibilityTest.class,
-        SingleMethodTest.class,
-        ClassLevelMethodsWithIgnoredTestsTest.class,
-        ValidationTest.class,
-        UserStopTest.class,
-        SortableTest.class,
-        JUnit38ClassRunnerTest.class,
-        SystemExitTest.class,
+        SingleMethodTest.class, ClassLevelMethodsWithIgnoredTestsTest.class,
+        ValidationTest.class, UserStopTest.class, SortableTest.class,
+        JUnit38ClassRunnerTest.class, SystemExitTest.class,
         JUnitCoreReturnsCorrectExitCodeTest.class,
-        SuiteMethodTest.class,
-        IgnoreClassTest.class,
-        OldTestClassAdaptingListenerTest.class,
-        AnnotatedDescriptionTest.class,
-        AssumptionViolatedExceptionTest.class,
-        ExperimentalTests.class,
-        InheritedTestTest.class,
-        TestClassTest.class,
-        AllMembersSupplierTest.class,
-        SpecificDataPointsSupplierTest.class,
-        ParameterizedAssertionErrorTest.class,
-        WithDataPointMethod.class,
-        WithNamedDataPoints.class,
-        WithAutoGeneratedDataPoints.class,
-        MatcherTest.class,
-        ObjectContractTest.class,
-        TheoriesPerformanceTest.class,
-        UseSuiteAsASuperclassTest.class,
-        FilterableTest.class,
-        FilterTest.class,
-        MaxStarterTest.class,
-        JUnit38SortingTest.class,
-        MethodRulesTest.class,
-        TestRuleTest.class,
-        TimeoutRuleTest.class,
-        ParallelClassTest.class,
-        ParallelMethodTest.class,
-        ParentRunnerTest.class,
-        NameRulesTest.class,
-        ClassRulesTest.class,
-        ExpectedExceptionTest.class,
-        TempFolderRuleTest.class,
-        TemporaryFolderUsageTest.class,
-        ExternalResourceRuleTest.class,
-        VerifierRuleTest.class,
-        CategoryTest.class,
-        CategoriesAndParameterizedTest.class,
-        MultiCategoryTest.class,
-        JavadocTest.class,
-        ParentRunnerFilteringTest.class,
-        BlockJUnit4ClassRunnerOverrideTest.class,
-        RuleFieldValidatorTest.class,
-        RuleChainTest.class,
-        BlockJUnit4ClassRunnerTest.class,
-        MethodSorterTest.class,
-        TestedOnSupplierTest.class,
-        StacktracePrintingMatcherTest.class,
-        StopwatchTest.class,
-        RunNotifierTest.class,
-        ConcurrentRunNotifierTest.class,
-        SynchronizedRunListenerTest.class,
-        FilterOptionIntegrationTest.class,
-        JUnitCommandLineParseResultTest.class,
-        FilterFactoriesTest.class,
-        CategoryFilterFactoryTest.class,
-        FrameworkFieldTest.class,
-        FrameworkMethodTest.class,
-        FailOnTimeoutTest.class,
-        JUnitCoreTest.class,
-        TestWithParametersTest.class,
-        ParameterizedNamesTest.class,
-        PublicClassValidatorTest.class
-})
+        InaccessibleBaseClassTest.class, SuiteMethodTest.class,
+        BadlyFormedClassesTest.class, IgnoreClassTest.class,
+        OldTestClassAdaptingListenerTest.class, AnnotatedDescriptionTest.class,
+        AssumptionViolatedExceptionTest.class, ExperimentalTests.class,
+        InheritedTestTest.class, TestClassTest.class,
+        AllMembersSupplierTest.class, SpecificDataPointsSupplierTest.class,
+        ParameterizedAssertionErrorTest.class, WithDataPointMethod.class,
+        WithNamedDataPoints.class, WithAutoGeneratedDataPoints.class,
+        MatcherTest.class, ObjectContractTest.class,
+        TheoriesPerformanceTest.class, JUnit4ClassRunnerTest.class,
+        UseSuiteAsASuperclassTest.class, FilterableTest.class,
+        FilterTest.class, MaxStarterTest.class, JUnit38SortingTest.class,
+        MethodRulesTest.class, TestRuleTest.class, TimeoutRuleTest.class,
+        ParallelClassTest.class, ParallelMethodTest.class,
+        ParentRunnerTest.class, NameRulesTest.class, ClassRulesTest.class,
+        ExpectedExceptionTest.class, TempFolderRuleTest.class,
+        TemporaryFolderUsageTest.class, ExternalResourceRuleTest.class,
+        VerifierRuleTest.class, CategoryTest.class,
+        CategoriesAndParameterizedTest.class, MultiCategoryTest.class,
+        JavadocTest.class, ParentRunnerFilteringTest.class,
+        BlockJUnit4ClassRunnerOverrideTest.class, RuleFieldValidatorTest.class,
+        RuleChainTest.class, BlockJUnit4ClassRunnerTest.class,
+        MethodSorterTest.class, TestedOnSupplierTest.class,
+        StacktracePrintingMatcherTest.class, StopwatchTest.class,
+        RunNotifierTest.class, ConcurrentRunNotifierTest.class,
+        SynchronizedRunListenerTest.class, FilterOptionIntegrationTest.class,
+        JUnitCommandLineParseResultTest.class, FilterFactoriesTest.class,
+        CategoryFilterFactoryTest.class, FrameworkFieldTest.class,
+        FrameworkMethodTest.class, FailOnTimeoutTest.class, JUnitCoreTest.class })
 public class AllTests {
     public static Test suite() {
         return new JUnit4TestAdapter(AllTests.class);
