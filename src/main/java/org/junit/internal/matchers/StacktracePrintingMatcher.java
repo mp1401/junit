@@ -14,24 +14,24 @@ import org.hamcrest.Matcher;
 public class StacktracePrintingMatcher<T extends Throwable> extends
         org.hamcrest.TypeSafeMatcher<T> {
 
-    private final Matcher<T> throwableMatcher;
+    private final Matcher<T> fThrowableMatcher;
 
     public StacktracePrintingMatcher(Matcher<T> throwableMatcher) {
-        this.throwableMatcher = throwableMatcher;
+        fThrowableMatcher = throwableMatcher;
     }
 
     public void describeTo(Description description) {
-        throwableMatcher.describeTo(description);
+        fThrowableMatcher.describeTo(description);
     }
 
     @Override
     protected boolean matchesSafely(T item) {
-        return throwableMatcher.matches(item);
+        return fThrowableMatcher.matches(item);
     }
 
     @Override
     protected void describeMismatchSafely(T item, Description description) {
-        throwableMatcher.describeMismatch(item, description);
+        fThrowableMatcher.describeMismatch(item, description);
         description.appendText("\nStacktrace was: ");
         description.appendText(readStacktrace(item));
     }

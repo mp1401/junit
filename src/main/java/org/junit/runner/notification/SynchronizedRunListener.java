@@ -21,66 +21,66 @@ import org.junit.runner.Result;
  */
 @RunListener.ThreadSafe
 final class SynchronizedRunListener extends RunListener {
-    private final RunListener listener;
-    private final Object monitor;
+    private final RunListener fListener;
+    private final Object fMonitor;
 
     SynchronizedRunListener(RunListener listener, Object monitor) {
-        this.listener = listener;
-        this.monitor = monitor;
+        fListener = listener;
+        fMonitor = monitor;
     }
 
     @Override
     public void testRunStarted(Description description) throws Exception {
-        synchronized (monitor) {
-            listener.testRunStarted(description);
+        synchronized (fMonitor) {
+            fListener.testRunStarted(description);
         }
     }
 
     @Override
     public void testRunFinished(Result result) throws Exception {
-        synchronized (monitor) {
-            listener.testRunFinished(result);
+        synchronized (fMonitor) {
+            fListener.testRunFinished(result);
         }
     }
 
     @Override
     public void testStarted(Description description) throws Exception {
-        synchronized (monitor) {
-            listener.testStarted(description);
+        synchronized (fMonitor) {
+            fListener.testStarted(description);
         }
     }
 
     @Override
     public void testFinished(Description description) throws Exception {
-        synchronized (monitor) {
-            listener.testFinished(description);
+        synchronized (fMonitor) {
+            fListener.testFinished(description);
         }
     }
 
     @Override
     public void testFailure(Failure failure) throws Exception {
-        synchronized (monitor) {
-            listener.testFailure(failure);
+        synchronized (fMonitor) {
+            fListener.testFailure(failure);
         }
     }
 
     @Override
     public void testAssumptionFailure(Failure failure) {
-        synchronized (monitor) {
-            listener.testAssumptionFailure(failure);
+        synchronized (fMonitor) {
+            fListener.testAssumptionFailure(failure);
         }
     }
 
     @Override
     public void testIgnored(Description description) throws Exception {
-        synchronized (monitor) {
-            listener.testIgnored(description);
+        synchronized (fMonitor) {
+            fListener.testIgnored(description);
         }
     }
 
     @Override
     public int hashCode() {
-        return listener.hashCode();
+        return fListener.hashCode();
     }
 
     @Override
@@ -93,11 +93,11 @@ final class SynchronizedRunListener extends RunListener {
         }
         SynchronizedRunListener that = (SynchronizedRunListener) other;
         
-        return listener.equals(that.listener);
+        return fListener.equals(that.fListener);
     }
 
     @Override
     public String toString() {
-        return listener.toString() + " (with synchronization wrapper)";
+        return fListener.toString() + " (with synchronization wrapper)";
     }
 }

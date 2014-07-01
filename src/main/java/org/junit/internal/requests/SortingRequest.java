@@ -8,18 +8,18 @@ import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Sorter;
 
 public class SortingRequest extends Request {
-    private final Request request;
-    private final Comparator<Description> comparator;
+    private final Request fRequest;
+    private final Comparator<Description> fComparator;
 
     public SortingRequest(Request request, Comparator<Description> comparator) {
-        this.request = request;
-        this.comparator = comparator;
+        fRequest = request;
+        fComparator = comparator;
     }
 
     @Override
     public Runner getRunner() {
-        Runner runner = request.getRunner();
-        new Sorter(comparator).apply(runner);
+        Runner runner = fRequest.getRunner();
+        new Sorter(fComparator).apply(runner);
         return runner;
     }
 }

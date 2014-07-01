@@ -71,10 +71,10 @@ import java.lang.reflect.Modifier;
 public class AnnotatedBuilder extends RunnerBuilder {
     private static final String CONSTRUCTOR_ERROR_FORMAT = "Custom runner class %s should have a public constructor with signature %s(Class testClass)";
 
-    private final RunnerBuilder suiteBuilder;
+    private final RunnerBuilder fSuiteBuilder;
 
     public AnnotatedBuilder(RunnerBuilder suiteBuilder) {
-        this.suiteBuilder = suiteBuilder;
+        fSuiteBuilder = suiteBuilder;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class AnnotatedBuilder extends RunnerBuilder {
         } catch (NoSuchMethodException e) {
             try {
                 return runnerClass.getConstructor(Class.class,
-                        RunnerBuilder.class).newInstance(testClass, suiteBuilder);
+                        RunnerBuilder.class).newInstance(testClass, fSuiteBuilder);
             } catch (NoSuchMethodException e2) {
                 String simpleName = runnerClass.getSimpleName();
                 throw new InitializationError(String.format(

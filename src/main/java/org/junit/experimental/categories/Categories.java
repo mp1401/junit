@@ -115,10 +115,10 @@ public class Categories extends Suite {
     }
 
     public static class CategoryFilter extends Filter {
-        private final Set<Class<?>> included;
-        private final Set<Class<?>> excluded;
-        private final boolean includedAny;
-        private final boolean excludedAny;
+        private final Set<Class<?>> fIncluded;
+        private final Set<Class<?>> fExcluded;
+        private final boolean fIncludedAny;
+        private final boolean fExcludedAny;
 
         public static CategoryFilter include(boolean matchAny, Class<?>... categories) {
             if (hasNull(categories)) {
@@ -157,10 +157,10 @@ public class Categories extends Suite {
 
         protected CategoryFilter(boolean matchAnyIncludes, Set<Class<?>> includes,
                                boolean matchAnyExcludes, Set<Class<?>> excludes) {
-            includedAny = matchAnyIncludes;
-            excludedAny = matchAnyExcludes;
-            included = copyAndRefine(includes);
-            excluded = copyAndRefine(excludes);
+            fIncludedAny= matchAnyIncludes;
+            fExcludedAny= matchAnyExcludes;
+            fIncluded= copyAndRefine(includes);
+            fExcluded= copyAndRefine(excludes);
         }
 
         /**
@@ -186,9 +186,9 @@ public class Categories extends Suite {
          */
         @Override public String toString() {
             StringBuilder description= new StringBuilder("categories ")
-                .append(included.isEmpty() ? "[all]" : included);
-            if (!excluded.isEmpty()) {
-                description.append(" - ").append(excluded);
+                .append(fIncluded.isEmpty() ? "[all]" : fIncluded);
+            if (!fExcluded.isEmpty()) {
+                description.append(" - ").append(fExcluded);
             }
             return description.toString();
         }
@@ -213,29 +213,29 @@ public class Categories extends Suite {
 
             // If a child has no categories, immediately return.
             if (childCategories.isEmpty()) {
-                return included.isEmpty();
+                return fIncluded.isEmpty();
             }
 
-            if (!excluded.isEmpty()) {
-                if (excludedAny) {
-                    if (matchesAnyParentCategories(childCategories, excluded)) {
+            if (!fExcluded.isEmpty()) {
+                if (fExcludedAny) {
+                    if (matchesAnyParentCategories(childCategories, fExcluded)) {
                         return false;
                     }
                 } else {
-                    if (matchesAllParentCategories(childCategories, excluded)) {
+                    if (matchesAllParentCategories(childCategories, fExcluded)) {
                         return false;
                     }
                 }
             }
 
-            if (included.isEmpty()) {
+            if (fIncluded.isEmpty()) {
                 // Couldn't be excluded, and with no suite's included categories treated as should run.
                 return true;
             } else {
-                if (includedAny) {
-                    return matchesAnyParentCategories(childCategories, included);
+                if (fIncludedAny) {
+                    return matchesAnyParentCategories(childCategories, fIncluded);
                 } else {
-                    return matchesAllParentCategories(childCategories, included);
+                    return matchesAllParentCategories(childCategories, fIncluded);
                 }
             }
         }

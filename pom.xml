@@ -108,7 +108,7 @@
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes>
-                    <include>LICENSE-junit.txt</include>
+                    <include>LICENSE.txt</include>
                 </includes>
             </resource>
         </resources>
@@ -332,11 +332,7 @@
                     </archive>
                 </configuration>
             </plugin>
-<<<<<<< Upstream, based on origin/master
 			<!-- CHECKSTYLE -->
-=======
-            			<!-- CHECKSTYLE -->
->>>>>>> f0c9c43 Update pom.xml
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -559,27 +555,6 @@
                         <configuration>
                             <additionalparam>-Xdoclint:accessibility -Xdoclint:reference</additionalparam>
                         </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>fast-tests</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <parallel>classes</parallel>
-                            <threadCountClasses>2</threadCountClasses>
-                        </configuration>
-                        <dependencies>
-                            <dependency>
-                                <groupId>org.apache.maven.surefire</groupId>
-                                <artifactId>surefire-junit47</artifactId>
-                                <version>2.17</version>
-                            </dependency>
-                        </dependencies>
                     </plugin>
                 </plugins>
             </build>

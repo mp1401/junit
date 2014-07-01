@@ -58,7 +58,7 @@ public class Suite extends ParentRunner<Runner> {
         return annotation.value();
     }
 
-    private final List<Runner> runners;
+    private final List<Runner> fRunners;
 
     /**
      * Called reflectively on classes annotated with <code>@RunWith(Suite.class)</code>
@@ -110,12 +110,12 @@ public class Suite extends ParentRunner<Runner> {
      */
     protected Suite(Class<?> klass, List<Runner> runners) throws InitializationError {
         super(klass);
-        this.runners = Collections.unmodifiableList(runners);
+        fRunners = Collections.unmodifiableList(runners);
     }
 
     @Override
     protected List<Runner> getChildren() {
-        return runners;
+        return fRunners;
     }
 
     @Override

@@ -32,19 +32,19 @@ public class TestClass implements Annotatable {
     private static final FieldComparator FIELD_COMPARATOR = new FieldComparator();
     private static final MethodComparator METHOD_COMPARATOR = new MethodComparator();
 
-    private final Class<?> clazz;
-    private final Map<Class<? extends Annotation>, List<FrameworkMethod>> methodsForAnnotations;
-    private final Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations;
+    private final Class<?> fClass;
+    private final Map<Class<? extends Annotation>, List<FrameworkMethod>> fMethodsForAnnotations;
+    private final Map<Class<? extends Annotation>, List<FrameworkField>> fFieldsForAnnotations;
 
     /**
-     * Creates a {@code TestClass} wrapping {@code clazz}. Each time this
+     * Creates a {@code TestClass} wrapping {@code klass}. Each time this
      * constructor executes, the class is scanned for annotations, which can be
      * an expensive process (we hope in future JDK's it will not be.) Therefore,
      * try to share instances of {@code TestClass} where possible.
      */
-    public TestClass(Class<?> clazz) {
-        this.clazz = clazz;
-        if (clazz != null && clazz.getConstructors().length > 1) {
+    public TestClass(Class<?> klass) {
+        fClass = klass;
+        if (klass != null && klass.getConstructors().length > 1) {
             throw new IllegalArgumentException(
                     "Test class can only have one constructor");
         }
@@ -56,12 +56,12 @@ public class TestClass implements Annotatable {
 
         scanAnnotatedMembers(methodsForAnnotations, fieldsForAnnotations);
 
-        this.methodsForAnnotations = makeDeeplyUnmodifiable(methodsForAnnotations);
-        this.fieldsForAnnotations = makeDeeplyUnmodifiable(fieldsForAnnotations);
+        fMethodsForAnnotations = makeDeeplyUnmodifiable(methodsForAnnotations);
+        fFieldsForAnnotations = makeDeeplyUnmodifiable(fieldsForAnnotations);
     }
 
     protected void scanAnnotatedMembers(Map<Class<? extends Annotation>, List<FrameworkMethod>> methodsForAnnotations, Map<Class<? extends Annotation>, List<FrameworkField>> fieldsForAnnotations) {
-        for (Class<?> eachClass : getSuperClasses(clazz)) {
+        for (Class<?> eachClass : getSuperClasses(fClass)) {
             for (Method eachMethod : MethodSorter.getDeclaredMethods(eachClass)) {
                 addToAnnotationLists(new FrameworkMethod(eachMethod), methodsForAnnotations);
             }
@@ -112,7 +112,7 @@ public class TestClass implements Annotatable {
      * @since 4.12
      */
     public List<FrameworkMethod> getAnnotatedMethods() {
-        List<FrameworkMethod> methods = collectValues(methodsForAnnotations);
+        List<FrameworkMethod> methods = collectValues(fMethodsForAnnotations);
         Collections.sort(methods, METHOD_COMPARATOR);
         return methods;
     }
@@ -123,7 +123,7 @@ public class TestClass implements Annotatable {
      */
     public List<FrameworkMethod> getAnnotatedMethods(
             Class<? extends Annotation> annotationClass) {
-        return Collections.unmodifiableList(getAnnotatedMembers(methodsForAnnotations, annotationClass, false));
+        return Collections.unmodifiableList(getAnnotatedMembers(fMethodsForAnnotations, annotationClass, false));
     }
 
     /**
@@ -133,7 +133,7 @@ public class TestClass implements Annotatable {
      * @since 4.12
      */
     public List<FrameworkField> getAnnotatedFields() {
-        return collectValues(fieldsForAnnotations);
+        return collectValues(fFieldsForAnnotations);
     }
 
     /**
@@ -142,7 +142,7 @@ public class TestClass implements Annotatable {
      */
     public List<FrameworkField> getAnnotatedFields(
             Class<? extends Annotation> annotationClass) {
-        return Collections.unmodifiableList(getAnnotatedMembers(fieldsForAnnotations, annotationClass, false));
+        return Collections.unmodifiableList(getAnnotatedMembers(fFieldsForAnnotations, annotationClass, false));
     }
 
     private <T> List<T> collectValues(Map<?, List<T>> map) {
@@ -181,17 +181,17 @@ public class TestClass implements Annotatable {
      * Returns the underlying Java class.
      */
     public Class<?> getJavaClass() {
-        return clazz;
+        return fClass;
     }
 
     /**
      * Returns the class's name.
      */
     public String getName() {
-        if (clazz == null) {
+        if (fClass == null) {
             return "null";
         }
-        return clazz.getName();
+        return fClass.getName();
     }
 
     /**
@@ -200,7 +200,7 @@ public class TestClass implements Annotatable {
      */
 
     public Constructor<?> getOnlyConstructor() {
-        Constructor<?>[] constructors = clazz.getConstructors();
+        Constructor<?>[] constructors = fClass.getConstructors();
         Assert.assertEquals(1, constructors.length);
         return constructors[0];
     }
@@ -209,17 +209,10 @@ public class TestClass implements Annotatable {
      * Returns the annotations on this class
      */
     public Annotation[] getAnnotations() {
-        if (clazz == null) {
+        if (fClass == null) {
             return new Annotation[0];
         }
-        return clazz.getAnnotations();
-    }
-
-    public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        if (clazz == null) {
-            return null;
-        }
-        return clazz.getAnnotation(annotationType);
+        return fClass.getAnnotations();
     }
 
     public <T> List<T> getAnnotatedFieldValues(Object test,
@@ -257,16 +250,16 @@ public class TestClass implements Annotatable {
     }
 
     public boolean isPublic() {
-        return Modifier.isPublic(clazz.getModifiers());
+        return Modifier.isPublic(fClass.getModifiers());
     }
 
     public boolean isANonStaticInnerClass() {
-        return clazz.isMemberClass() && !isStatic(clazz.getModifiers());
+        return fClass.isMemberClass() && !isStatic(fClass.getModifiers());
     }
 
     @Override
     public int hashCode() {
-        return (clazz == null) ? 0 : clazz.hashCode();
+        return (fClass == null) ? 0 : fClass.hashCode();
     }
 
     @Override
@@ -281,7 +274,7 @@ public class TestClass implements Annotatable {
             return false;
         }
         TestClass other = (TestClass) obj;
-        return clazz == other.clazz;
+        return fClass == other.fClass;
     }
 
     /**

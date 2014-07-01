@@ -8,29 +8,29 @@ import org.junit.runners.model.MultipleFailureException;
 import org.junit.runners.model.Statement;
 
 public class RunAfters extends Statement {
-    private final Statement next;
+    private final Statement fNext;
 
-    private final Object target;
+    private final Object fTarget;
 
-    private final List<FrameworkMethod> afters;
+    private final List<FrameworkMethod> fAfters;
 
     public RunAfters(Statement next, List<FrameworkMethod> afters, Object target) {
-        this.next = next;
-        this.afters = afters;
-        this.target = target;
+        fNext = next;
+        fAfters = afters;
+        fTarget = target;
     }
 
     @Override
     public void evaluate() throws Throwable {
         List<Throwable> errors = new ArrayList<Throwable>();
         try {
-            next.evaluate();
+            fNext.evaluate();
         } catch (Throwable e) {
             errors.add(e);
         } finally {
-            for (FrameworkMethod each : afters) {
+            for (FrameworkMethod each : fAfters) {
                 try {
-                    each.invokeExplosively(target);
+                    each.invokeExplosively(fTarget);
                 } catch (Throwable e) {
                     errors.add(e);
                 }

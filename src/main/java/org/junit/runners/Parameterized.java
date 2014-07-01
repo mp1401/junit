@@ -1,7 +1,6 @@
 package org.junit.runners;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -220,7 +219,6 @@ public class Parameterized extends Suite {
      * constructor.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Inherited
     @Target(ElementType.TYPE)
     public @interface UseParametersRunnerFactory {
         /**
@@ -234,7 +232,7 @@ public class Parameterized extends Suite {
 
     private static final List<Runner> NO_RUNNERS = Collections.<Runner>emptyList();
 
-    private final List<Runner> runners;
+    private final List<Runner> fRunners;
 
     /**
      * Only called reflectively. Do not use programmatically.
@@ -245,7 +243,7 @@ public class Parameterized extends Suite {
                 klass);
         Parameters parameters = getParametersMethod().getAnnotation(
                 Parameters.class);
-        runners = Collections.unmodifiableList(createRunnersForParameters(
+        fRunners = Collections.unmodifiableList(createRunnersForParameters(
                 allParameters(), parameters.name(), runnerFactory));
     }
 
@@ -264,7 +262,7 @@ public class Parameterized extends Suite {
 
     @Override
     protected List<Runner> getChildren() {
-        return runners;
+        return fRunners;
     }
 
     private TestWithParameters createTestWithNotNormalizedParameters(

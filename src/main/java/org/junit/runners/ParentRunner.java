@@ -1,7 +1,7 @@
 package org.junit.runners;
 
-import static org.junit.internal.runners.rules.RuleMemberValidator.CLASS_RULE_METHOD_VALIDATOR;
-import static org.junit.internal.runners.rules.RuleMemberValidator.CLASS_RULE_VALIDATOR;
+import static org.junit.internal.runners.rules.RuleFieldValidator.CLASS_RULE_METHOD_VALIDATOR;
+import static org.junit.internal.runners.rules.RuleFieldValidator.CLASS_RULE_VALIDATOR;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -60,13 +60,13 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
     private static final List<TestClassValidator> VALIDATORS = Arrays.asList(
             new AnnotationsValidator(), new PublicClassValidator());
 
-    private final Object childrenLock = new Object();
-    private final TestClass testClass;
+    private final Object fChildrenLock = new Object();
+    private final TestClass fTestClass;
 
-    // Guarded by childrenLock
-    private volatile Collection<T> filteredChildren = null;
+    // Guarded by fChildrenLock
+    private volatile Collection<T> fFilteredChildren = null;
 
-    private volatile RunnerScheduler scheduler = new RunnerScheduler() {
+    private volatile RunnerScheduler fScheduler = new RunnerScheduler() {
         public void schedule(Runnable childStatement) {
             childStatement.run();
         }
@@ -80,7 +80,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * Constructs a new {@code ParentRunner} that will run {@code @TestClass}
      */
     protected ParentRunner(Class<?> testClass) throws InitializationError {
-        this.testClass = createTestClass(testClass);
+        fTestClass = createTestClass(testClass);
         validate();
     }
 
@@ -211,7 +211,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * Exception, stop execution and pass the exception on.
      */
     protected Statement withBeforeClasses(Statement statement) {
-        List<FrameworkMethod> befores = testClass
+        List<FrameworkMethod> befores = fTestClass
                 .getAnnotatedMethods(BeforeClass.class);
         return befores.isEmpty() ? statement :
                 new RunBefores(statement, befores, null);
@@ -225,7 +225,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * {@link org.junit.runners.model.MultipleFailureException}.
      */
     protected Statement withAfterClasses(Statement statement) {
-        List<FrameworkMethod> afters = testClass
+        List<FrameworkMethod> afters = fTestClass
                 .getAnnotatedMethods(AfterClass.class);
         return afters.isEmpty() ? statement :
                 new RunAfters(statement, afters, null);
@@ -251,8 +251,8 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      *         each method in the tested class.
      */
     protected List<TestRule> classRules() {
-        List<TestRule> result = testClass.getAnnotatedMethodValues(null, ClassRule.class, TestRule.class);
-        result.addAll(testClass.getAnnotatedFieldValues(null, ClassRule.class, TestRule.class));
+        List<TestRule> result = fTestClass.getAnnotatedMethodValues(null, ClassRule.class, TestRule.class);
+        result.addAll(fTestClass.getAnnotatedFieldValues(null, ClassRule.class, TestRule.class));
         return result;
     }
 
@@ -282,17 +282,17 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
     }
 
     private void runChildren(final RunNotifier notifier) {
-        final RunnerScheduler currentScheduler = scheduler;
+        final RunnerScheduler scheduler = fScheduler;
         try {
             for (final T each : getFilteredChildren()) {
-                currentScheduler.schedule(new Runnable() {
+                scheduler.schedule(new Runnable() {
                     public void run() {
                         ParentRunner.this.runChild(each, notifier);
                     }
                 });
             }
         } finally {
-            currentScheduler.finished();
+            scheduler.finished();
         }
     }
 
@@ -300,7 +300,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * Returns a name used to describe this Runner
      */
     protected String getName() {
-        return testClass.getName();
+        return fTestClass.getName();
     }
 
     //
@@ -311,7 +311,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * Returns a {@link TestClass} object wrapping the class to be executed.
      */
     public final TestClass getTestClass() {
-        return testClass;
+        return fTestClass;
     }
 
     /**
@@ -337,7 +337,7 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      *         description.
      */
     protected Annotation[] getRunnerAnnotations() {
-        return testClass.getAnnotations();
+        return fTestClass.getAnnotations();
     }
 
     //
@@ -375,9 +375,9 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
     //
 
     public void filter(Filter filter) throws NoTestsRemainException {
-        synchronized (childrenLock) {
-            List<T> children = new ArrayList<T>(getFilteredChildren());
-            for (Iterator<T> iter = children.iterator(); iter.hasNext(); ) {
+        synchronized (fChildrenLock) {
+            List<T> filteredChildren = new ArrayList<T>(getFilteredChildren());
+            for (Iterator<T> iter = filteredChildren.iterator(); iter.hasNext(); ) {
                 T each = iter.next();
                 if (shouldRun(filter, each)) {
                     try {
@@ -389,21 +389,21 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
                     iter.remove();
                 }
             }
-            filteredChildren = Collections.unmodifiableCollection(children);
-            if (filteredChildren.isEmpty()) {
+            fFilteredChildren = Collections.unmodifiableCollection(filteredChildren);
+            if (fFilteredChildren.isEmpty()) {
                 throw new NoTestsRemainException();
             }
         }
     }
 
     public void sort(Sorter sorter) {
-        synchronized (childrenLock) {
+        synchronized (fChildrenLock) {
             for (T each : getFilteredChildren()) {
                 sorter.apply(each);
             }
             List<T> sortedChildren = new ArrayList<T>(getFilteredChildren());
             Collections.sort(sortedChildren, comparator(sorter));
-            filteredChildren = Collections.unmodifiableCollection(sortedChildren);
+            fFilteredChildren = Collections.unmodifiableCollection(sortedChildren);
         }
     }
 
@@ -420,14 +420,14 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
     }
 
     private Collection<T> getFilteredChildren() {
-        if (filteredChildren == null) {
-            synchronized (childrenLock) {
-                if (filteredChildren == null) {
-                    filteredChildren = Collections.unmodifiableCollection(getChildren());
+        if (fFilteredChildren == null) {
+            synchronized (fChildrenLock) {
+                if (fFilteredChildren == null) {
+                    fFilteredChildren = Collections.unmodifiableCollection(getChildren());
                 }
             }
         }
-        return filteredChildren;
+        return fFilteredChildren;
     }
 
     private boolean shouldRun(Filter filter, T each) {
@@ -447,6 +447,6 @@ public abstract class ParentRunner<T> extends Runner implements Filterable,
      * of children.  Highly experimental feature that may change.
      */
     public void setScheduler(RunnerScheduler scheduler) {
-        this.scheduler = scheduler;
+        this.fScheduler = scheduler;
     }
 }

@@ -3,14 +3,14 @@ package org.junit.internal.runners.statements;
 import org.junit.runners.model.Statement;
 
 public class Fail extends Statement {
-    private final Throwable error;
+    private final Throwable fError;
 
     public Fail(Throwable e) {
-        error = e;
+        fError = e;
     }
 
     @Override
     public void evaluate() throws Throwable {
-        throw error;
+        throw fError;
     }
 }

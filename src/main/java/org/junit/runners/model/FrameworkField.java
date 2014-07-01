@@ -12,14 +12,14 @@ import org.junit.runners.BlockJUnit4ClassRunner;
  * @since 4.7
  */
 public class FrameworkField extends FrameworkMember<FrameworkField> {
-    private final Field field;
+    private final Field fField;
 
     FrameworkField(Field field) {
         if (field == null) {
             throw new NullPointerException(
                     "FrameworkField cannot be created without an underlying field.");
         }
-        this.field = field;
+        fField = field;
     }
 
     @Override
@@ -28,11 +28,7 @@ public class FrameworkField extends FrameworkMember<FrameworkField> {
     }
 
     public Annotation[] getAnnotations() {
-        return field.getAnnotations();
-    }
-
-    public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        return field.getAnnotation(annotationType);
+        return fField.getAnnotations();
     }
 
     @Override
@@ -42,14 +38,14 @@ public class FrameworkField extends FrameworkMember<FrameworkField> {
 
     @Override
     protected int getModifiers() {
-        return field.getModifiers();
+        return fField.getModifiers();
     }
 
     /**
      * @return the underlying java Field
      */
     public Field getField() {
-        return field;
+        return fField;
     }
 
     /**
@@ -58,23 +54,23 @@ public class FrameworkField extends FrameworkMember<FrameworkField> {
      */
     @Override
     public Class<?> getType() {
-        return field.getType();
+        return fField.getType();
     }
     
     @Override
     public Class<?> getDeclaringClass() {
-        return field.getDeclaringClass();
+        return fField.getDeclaringClass();
     }
 
     /**
      * Attempts to retrieve the value of this field on {@code target}
      */
     public Object get(Object target) throws IllegalArgumentException, IllegalAccessException {
-        return field.get(target);
+        return fField.get(target);
     }
 
     @Override
     public String toString() {
-        return field.toString();
+        return fField.toString();
     }
 }

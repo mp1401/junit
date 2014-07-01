@@ -12,13 +12,13 @@ import org.junit.runners.model.RunnerBuilder;
 import org.junit.runners.model.RunnerScheduler;
 
 public class ParallelComputer extends Computer {
-    private final boolean classes;
+    private final boolean fClasses;
 
-    private final boolean methods;
+    private final boolean fMethods;
 
     public ParallelComputer(boolean classes, boolean methods) {
-        this.classes = classes;
-        this.methods = methods;
+        fClasses = classes;
+        fMethods = methods;
     }
 
     public static Computer classes() {
@@ -55,13 +55,13 @@ public class ParallelComputer extends Computer {
     public Runner getSuite(RunnerBuilder builder, java.lang.Class<?>[] classes)
             throws InitializationError {
         Runner suite = super.getSuite(builder, classes);
-        return this.classes ? parallelize(suite) : suite;
+        return fClasses ? parallelize(suite) : suite;
     }
 
     @Override
     protected Runner getRunner(RunnerBuilder builder, Class<?> testClass)
             throws Throwable {
         Runner runner = super.getRunner(builder, testClass);
-        return methods ? parallelize(runner) : runner;
+        return fMethods ? parallelize(runner) : runner;
     }
 }

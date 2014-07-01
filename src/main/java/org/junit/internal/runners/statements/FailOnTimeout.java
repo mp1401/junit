@@ -14,11 +14,11 @@ import org.junit.runners.model.Statement;
 import org.junit.runners.model.TestTimedOutException;
 
 public class FailOnTimeout extends Statement {
-    private final Statement originalStatement;
-    private final TimeUnit timeUnit;
-    private final long timeout;
-    private final boolean lookForStuckThread;
-    private volatile ThreadGroup threadGroup = null;
+    private final Statement fOriginalStatement;
+    private final TimeUnit fTimeUnit;
+    private final long fTimeout;
+    private final boolean fLookForStuckThread;
+    private volatile ThreadGroup fThreadGroup = null;
 
     public FailOnTimeout(Statement originalStatement, long millis) {
         this(originalStatement, millis, TimeUnit.MILLISECONDS);
@@ -29,17 +29,17 @@ public class FailOnTimeout extends Statement {
     }
 
     public FailOnTimeout(Statement originalStatement, long timeout, TimeUnit unit, boolean lookForStuckThread) {
-        this.originalStatement = originalStatement;
-        this.timeout = timeout;
-        timeUnit = unit;
-        this.lookForStuckThread = lookForStuckThread;
+        fOriginalStatement = originalStatement;
+        fTimeout = timeout;
+        fTimeUnit = unit;
+        fLookForStuckThread = lookForStuckThread;
     }
 
     @Override
     public void evaluate() throws Throwable {
         FutureTask<Throwable> task = new FutureTask<Throwable>(new CallableStatement());
-        threadGroup = new ThreadGroup("FailOnTimeoutGroup");
-        Thread thread = new Thread(threadGroup, task, "Time-limited test");
+        fThreadGroup = new ThreadGroup("FailOnTimeoutGroup");
+        Thread thread = new Thread(fThreadGroup, task, "Time-limited test");
         thread.setDaemon(true);
         thread.start();
         Throwable throwable = getResult(task, thread);
@@ -55,8 +55,8 @@ public class FailOnTimeout extends Statement {
      */
     private Throwable getResult(FutureTask<Throwable> task, Thread thread) {
         try {
-            if (timeout > 0) {
-                return task.get(timeout, timeUnit);
+            if (fTimeout > 0) {
+                return task.get(fTimeout, fTimeUnit);
             } else {
                 return task.get();
             }
@@ -72,8 +72,8 @@ public class FailOnTimeout extends Statement {
 
     private Exception createTimeoutException(Thread thread) {
         StackTraceElement[] stackTrace = thread.getStackTrace();
-        final Thread stuckThread = lookForStuckThread ? getStuckThread(thread) : null;
-        Exception currThreadException = new TestTimedOutException(timeout, timeUnit);
+        final Thread stuckThread = fLookForStuckThread ? getStuckThread(thread) : null;
+        Exception currThreadException = new TestTimedOutException(fTimeout, fTimeUnit);
         if (stackTrace != null) {
             currThreadException.setStackTrace(stackTrace);
             thread.interrupt();
@@ -115,14 +115,12 @@ public class FailOnTimeout extends Statement {
      * to {@code mainThread}.
      */
     private Thread getStuckThread (Thread mainThread) {
-        if (threadGroup == null){
+        if (fThreadGroup == null) 
             return null;
-        }
-        Thread[] threadsInGroup = getThreadArray(threadGroup);
-        if (threadsInGroup == null){
+        Thread[] threadsInGroup = getThreadArray(fThreadGroup);
+        if (threadsInGroup == null) 
             return null;
-        }
-
+        
         // Now that we have all the threads in the test's thread group: Assume that
         // any thread we're "stuck" in is RUNNABLE.  Look for all RUNNABLE threads. 
         // If just one, we return that (unless it equals threadMain).  If there's more
@@ -206,7 +204,7 @@ public class FailOnTimeout extends Statement {
     private class CallableStatement implements Callable<Throwable> {
         public Throwable call() throws Exception {
             try {
-                originalStatement.evaluate();
+                fOriginalStatement.evaluate();
             } catch (Exception e) {
                 throw e;
             } catch (Throwable e) {

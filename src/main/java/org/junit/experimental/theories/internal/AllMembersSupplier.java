@@ -22,16 +22,16 @@ import org.junit.runners.model.TestClass;
  */
 public class AllMembersSupplier extends ParameterSupplier {
     static class MethodParameterValue extends PotentialAssignment {
-        private final FrameworkMethod method;
+        private final FrameworkMethod fMethod;
 
         private MethodParameterValue(FrameworkMethod dataPointMethod) {
-            method = dataPointMethod;
+            fMethod = dataPointMethod;
         }
 
         @Override
         public Object getValue() throws CouldNotGenerateValueException {
             try {
-                return method.invokeExplosively(null);
+                return fMethod.invokeExplosively(null);
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException(
                         "unexpected: argument length is checked");
@@ -39,7 +39,7 @@ public class AllMembersSupplier extends ParameterSupplier {
                 throw new RuntimeException(
                         "unexpected: getMethods returned an inaccessible method");
             } catch (Throwable throwable) {
-                DataPoint annotation = method.getAnnotation(DataPoint.class);
+                DataPoint annotation = fMethod.getAnnotation(DataPoint.class);
                 Assume.assumeTrue(annotation == null || !isAssignableToAnyOf(annotation.ignoredExceptions(), throwable));
                 
                 throw new CouldNotGenerateValueException(throwable);
@@ -48,17 +48,17 @@ public class AllMembersSupplier extends ParameterSupplier {
 
         @Override
         public String getDescription() throws CouldNotGenerateValueException {
-            return method.getName();
+            return fMethod.getName();
         }
     }
     
-    private final TestClass clazz;
+    private final TestClass fClass;
 
     /**
      * Constructs a new supplier for {@code type}
      */
     public AllMembersSupplier(TestClass type) {
-        clazz = type;
+        fClass = type;
     }
 
     @Override
@@ -172,11 +172,11 @@ public class AllMembersSupplier extends ParameterSupplier {
     }
 
     protected Collection<FrameworkMethod> getDataPointsMethods(ParameterSignature sig) {
-        return clazz.getAnnotatedMethods(DataPoints.class);
+        return fClass.getAnnotatedMethods(DataPoints.class);        
     }
     
     protected Collection<Field> getSingleDataPointFields(ParameterSignature sig) {
-        List<FrameworkField> fields = clazz.getAnnotatedFields(DataPoint.class);
+        List<FrameworkField> fields = fClass.getAnnotatedFields(DataPoint.class);
         Collection<Field> validFields = new ArrayList<Field>();
 
         for (FrameworkField frameworkField : fields) {
@@ -187,7 +187,7 @@ public class AllMembersSupplier extends ParameterSupplier {
     }
     
     protected Collection<Field> getDataPointsFields(ParameterSignature sig) {
-        List<FrameworkField> fields = clazz.getAnnotatedFields(DataPoints.class);
+        List<FrameworkField> fields = fClass.getAnnotatedFields(DataPoints.class);
         Collection<Field> validFields = new ArrayList<Field>();
 
         for (FrameworkField frameworkField : fields) {
@@ -198,7 +198,7 @@ public class AllMembersSupplier extends ParameterSupplier {
     }
     
     protected Collection<FrameworkMethod> getSingleDataPointMethods(ParameterSignature sig) {
-        return clazz.getAnnotatedMethods(DataPoint.class);
+        return fClass.getAnnotatedMethods(DataPoint.class);
     }
 
 }

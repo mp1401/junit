@@ -11,22 +11,22 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.model.InitializationError;
 
 public class ErrorReportingRunner extends Runner {
-    private final List<Throwable> causes;
+    private final List<Throwable> fCauses;
 
-    private final Class<?> testClass;
+    private final Class<?> fTestClass;
 
     public ErrorReportingRunner(Class<?> testClass, Throwable cause) {
         if (testClass == null) {
             throw new NullPointerException("Test class cannot be null");
         }
-        this.testClass = testClass;
-        causes = getCauses(cause);
+        fTestClass = testClass;
+        fCauses = getCauses(cause);
     }
 
     @Override
     public Description getDescription() {
-        Description description = Description.createSuiteDescription(testClass);
-        for (Throwable each : causes) {
+        Description description = Description.createSuiteDescription(fTestClass);
+        for (Throwable each : fCauses) {
             description.addChild(describeCause(each));
         }
         return description;
@@ -34,7 +34,7 @@ public class ErrorReportingRunner extends Runner {
 
     @Override
     public void run(RunNotifier notifier) {
-        for (Throwable each : causes) {
+        for (Throwable each : fCauses) {
             runCause(each, notifier);
         }
     }
@@ -55,7 +55,7 @@ public class ErrorReportingRunner extends Runner {
     }
 
     private Description describeCause(Throwable child) {
-        return Description.createTestDescription(testClass,
+        return Description.createTestDescription(fTestClass,
                 "initializationError");
     }
 

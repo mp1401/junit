@@ -8,26 +8,26 @@ import org.hamcrest.TypeSafeMatcher;
 public class ThrowableMessageMatcher<T extends Throwable> extends
         TypeSafeMatcher<T> {
 
-    private final Matcher<String> matcher;
+    private final Matcher<String> fMatcher;
 
     public ThrowableMessageMatcher(Matcher<String> matcher) {
-        this.matcher = matcher;
+        fMatcher = matcher;
     }
 
     public void describeTo(Description description) {
         description.appendText("exception with message ");
-        description.appendDescriptionOf(matcher);
+        description.appendDescriptionOf(fMatcher);
     }
 
     @Override
     protected boolean matchesSafely(T item) {
-        return matcher.matches(item.getMessage());
+        return fMatcher.matches(item.getMessage());
     }
 
     @Override
     protected void describeMismatchSafely(T item, Description description) {
         description.appendText("message ");
-        matcher.describeMismatch(item.getMessage(), description);
+        fMatcher.describeMismatch(item.getMessage(), description);
     }
 
     @Factory
