@@ -1,16 +1,18 @@
 package org.junit.runner;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assume.assumeThat;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.ExcludeCategories;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 import org.junit.runner.manipulation.Filter;
-
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.runner.Description.createSuiteDescription;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 public class FilterFactoriesTest {
     @Rule
@@ -19,27 +21,47 @@ public class FilterFactoriesTest {
     @Rule
     public TestName testName = new TestName();
 
+    private Request createSuiteRequest() {
+        return Request.aClass(DummySuite.class);
+    }
+
     @Test
     public void shouldCreateFilterWithArguments() throws Exception {
-        Filter filter = FilterFactories.createFilterFromFilterSpec(
-                createSuiteDescription(testName.getMethodName()),
-                ExcludeCategories.class.getName() + "=" + DummyCategory.class.getName());
+        final Filter filter = FilterFactories.createFilterFromFilterSpec(
+                createSuiteRequest(), ExcludeCategories.class.getName() + "="
+                        + DummyCategory.class.getName());
 
         assertThat(filter.describe(), startsWith("excludes "));
     }
 
     @Test
     public void shouldCreateFilterWithNoArguments() throws Exception {
-        Filter filter = FilterFactories.createFilterFromFilterSpec(
-                createSuiteDescription(testName.getMethodName()), FilterFactoryStub.class.getName());
+        final Filter filter = FilterFactories.createFilterFromFilterSpec(
+                createSuiteRequest(), FilterFactoryStub.class.getName());
 
         assertThat(filter, instanceOf(DummyFilter.class));
     }
 
     @Test
+    public void shouldPassOnDescriptionToFilterFactory() throws Exception {
+        final Request request = createSuiteRequest();
+        final Description description = request.getRunner().getDescription();
+        final Filter filter = FilterFactories.createFilterFromFilterSpec(
+                request, FilterFactoryStub.class.getName());
+
+        // This assumption tested in shouldCreateFilterWithNoArguments()
+        assumeThat(filter, instanceOf(DummyFilter.class));
+
+        final DummyFilter dummyFilter = (DummyFilter) filter;
+        assertThat(dummyFilter.getTopLevelDescription(), is(description));
+    }
+
+    @Test
     public void shouldCreateFilter() throws Exception {
-        Filter filter = FilterFactories.createFilter(
-                FilterFactoryStub.class, new FilterFactoryParams(""));
+        final Filter filter = FilterFactories.createFilter(
+                FilterFactoryStub.class,
+                new FilterFactoryParams(Description
+                        .createSuiteDescription(testName.getMethodName()), ""));
 
         assertThat(filter, instanceOf(DummyFilter.class));
     }
@@ -65,20 +87,32 @@ public class FilterFactoriesTest {
         private NonInstantiableFilterFactory() {
         }
 
-        public Filter createFilter(FilterFactoryParams params) throws FilterNotCreatedException {
-            throw new FilterNotCreatedException(new Exception("not implemented"));
+        public Filter createFilter(final FilterFactoryParams params)
+                throws FilterNotCreatedException {
+            throw new FilterNotCreatedException(
+                    new Exception("not implemented"));
         }
     }
 
     public static class FilterFactoryStub implements FilterFactory {
-        public Filter createFilter(FilterFactoryParams unused) {
-            return new DummyFilter();
+        public Filter createFilter(final FilterFactoryParams params) {
+            return new DummyFilter(params.getTopLevelDescription());
         }
     }
 
     private static class DummyFilter extends Filter {
+        private final Description fTopLevelDescription;
+
+        public DummyFilter(final Description topLevelDescription) {
+            fTopLevelDescription = topLevelDescription;
+        }
+
+        public Description getTopLevelDescription() {
+            return fTopLevelDescription;
+        }
+
         @Override
-        public boolean shouldRun(Description description) {
+        public boolean shouldRun(final Description description) {
             return false;
         }
 
@@ -89,5 +123,16 @@ public class FilterFactoriesTest {
     }
 
     public static class DummyCategory {
+    }
+
+    @RunWith(Suite.class)
+    @SuiteClasses(DummyTest.class)
+    public static class DummySuite {
+    }
+
+    public static class DummyTest {
+        @Test
+        public void passes() {
+        }
     }
 }

@@ -2,6 +2,7 @@ package org.junit.experimental.categories;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.runner.Description.createSuiteDescription;
 
 import java.util.List;
 
@@ -21,20 +22,22 @@ public class CategoryFilterFactoryTest {
     @Rule
     public TestName testName = new TestName();
 
-    private CategoryFilterFactory categoryFilterFactory = new CategoryFilterFactoryStub();
+    private final CategoryFilterFactory categoryFilterFactory = new CategoryFilterFactoryStub();
 
     @Test
     public void shouldCreateFilter() throws Exception {
-        FilterFactoryParams params = new FilterFactoryParams(
+        final FilterFactoryParams params = new FilterFactoryParams(
+                createSuiteDescription(testName.getMethodName()),
                 CategoryFilterFactoryStub.class.getName());
-        Filter filter = categoryFilterFactory.createFilter(params);
+        final Filter filter = categoryFilterFactory.createFilter(params);
 
         assertThat(filter, instanceOf(DummyFilter.class));
     }
 
     @Test
     public void shouldThrowException() throws Exception {
-        FilterFactoryParams params = new FilterFactoryParams(
+        final FilterFactoryParams params = new FilterFactoryParams(
+                createSuiteDescription(testName.getMethodName()),
                 "NonExistentFilter");
 
         expectedException.expect(FilterFactory.FilterNotCreatedException.class);
@@ -42,16 +45,17 @@ public class CategoryFilterFactoryTest {
         categoryFilterFactory.createFilter(params);
     }
 
-    private static class CategoryFilterFactoryStub extends CategoryFilterFactory {
+    private static class CategoryFilterFactoryStub extends
+            CategoryFilterFactory {
         @Override
-        protected Filter createFilter(List<Class<?>> categories) {
+        protected Filter createFilter(final List<Class<?>> categories) {
             return new DummyFilter();
         }
     }
 
     private static class DummyFilter extends Filter {
         @Override
-        public boolean shouldRun(Description description) {
+        public boolean shouldRun(final Description description) {
             return false;
         }
 
