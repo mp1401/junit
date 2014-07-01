@@ -11,10 +11,10 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.rules.ExpectedException.none;
-import static org.junit.tests.experimental.rules.EventCollector.everyTestRunSuccessful;
-import static org.junit.tests.experimental.rules.EventCollector.hasSingleAssumptionFailure;
-import static org.junit.tests.experimental.rules.EventCollector.hasSingleFailure;
-import static org.junit.tests.experimental.rules.EventCollector.hasSingleFailureWithMessage;
+import static org.junit.testsupport.EventCollectorMatchers.everyTestRunSuccessful;
+import static org.junit.testsupport.EventCollectorMatchers.hasSingleAssumptionFailure;
+import static org.junit.testsupport.EventCollectorMatchers.hasSingleFailure;
+import static org.junit.testsupport.EventCollectorMatchers.hasSingleFailureWithMessage;
 
 import java.util.Collection;
 
@@ -27,84 +27,86 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.junit.testsupport.EventCollector;
 
 @RunWith(Parameterized.class)
 public class ExpectedExceptionTest {
     private static final String ARBITRARY_MESSAGE = "arbitrary message";
 
-    @Parameters(name= "{0}")
+    @Parameters(name = "{0}")
     public static Collection<Object[]> testsWithEventMatcher() {
-        return asList(new Object[][]{
-                {EmptyTestExpectingNoException.class, everyTestRunSuccessful()},
-                {ThrowExceptionWithExpectedType.class,
-                        everyTestRunSuccessful()},
-                {ThrowExceptionWithExpectedPartOfMessage.class,
-                        everyTestRunSuccessful()},
+        return asList(new Object[][] {
+                { EmptyTestExpectingNoException.class, everyTestRunSuccessful() },
+                { ThrowExceptionWithExpectedType.class,
+                        everyTestRunSuccessful() },
+                { ThrowExceptionWithExpectedPartOfMessage.class,
+                        everyTestRunSuccessful() },
                 {
                         ThrowExceptionWithWrongType.class,
-                        hasSingleFailureWithMessage(startsWith("\nExpected: an instance of java.lang.NullPointerException"))},
+                        hasSingleFailureWithMessage(startsWith("\nExpected: an instance of java.lang.NullPointerException")) },
                 {
                         HasWrongMessage.class,
                         hasSingleFailureWithMessage(startsWith("\nExpected: exception with message a string containing \"expectedMessage\"\n"
-                                + "     but: message was \"actualMessage\""))},
+                                + "     but: message was \"actualMessage\"")) },
                 {
                         ThrowNoExceptionButExpectExceptionWithType.class,
-                        hasSingleFailureWithMessage("Expected test to throw an instance of java.lang.NullPointerException")},
-                {WronglyExpectsExceptionMessage.class, hasSingleFailure()},
-                {ExpectsSubstring.class, everyTestRunSuccessful()},
+                        hasSingleFailureWithMessage("Expected test to throw an instance of java.lang.NullPointerException") },
+                { WronglyExpectsExceptionMessage.class, hasSingleFailure() },
+                { ExpectsSubstring.class, everyTestRunSuccessful() },
                 {
                         ExpectsSubstringNullMessage.class,
-                        hasSingleFailureWithMessage(startsWith("\nExpected: exception with message a string containing \"anything!\""))},
-                {ExpectsMessageMatcher.class, everyTestRunSuccessful()},
+                        hasSingleFailureWithMessage(startsWith("\nExpected: exception with message a string containing \"anything!\"")) },
+                { ExpectsMessageMatcher.class, everyTestRunSuccessful() },
                 {
                         ExpectedMessageMatcherFails.class,
-                        hasSingleFailureWithMessage(startsWith("\nExpected: exception with message \"Wrong start\""))},
-                {ExpectsMatcher.class, everyTestRunSuccessful()},
-                {ExpectAssertionErrorWhichIsNotThrown.class, hasSingleFailure()},
-                {FailedAssumptionAndExpectException.class,
-                        hasSingleAssumptionFailure()},
-                {FailBeforeExpectingException.class,
-                        hasSingleFailureWithMessage(ARBITRARY_MESSAGE)},
+                        hasSingleFailureWithMessage(startsWith("\nExpected: exception with message \"Wrong start\"")) },
+                { ExpectsMatcher.class, everyTestRunSuccessful() },
+                { ExpectAssertionErrorWhichIsNotThrown.class,
+                        hasSingleFailure() },
+                { FailedAssumptionAndExpectException.class,
+                        hasSingleAssumptionFailure() },
+                { FailBeforeExpectingException.class,
+                        hasSingleFailureWithMessage(ARBITRARY_MESSAGE) },
                 {
                         ExpectsMultipleMatchers.class,
-                        hasSingleFailureWithMessage(startsWith("\nExpected: (an instance of java.lang.IllegalArgumentException and exception with message a string containing \"Ack!\")"))},
-                {ThrowExceptionWithMatchingCause.class, everyTestRunSuccessful()},
-                {ThrowExpectedNullCause.class, everyTestRunSuccessful()},
+                        hasSingleFailureWithMessage(startsWith("\nExpected: (an instance of java.lang.IllegalArgumentException and exception with message a string containing \"Ack!\")")) },
+                { ThrowExceptionWithMatchingCause.class,
+                        everyTestRunSuccessful() },
+                { ThrowExpectedNullCause.class, everyTestRunSuccessful() },
                 {
                         ThrowUnexpectedCause.class,
-                        hasSingleFailureWithMessage(CoreMatchers.<String>allOf(
-                                startsWith("\nExpected: ("),
-                                containsString("exception with cause is <java.lang.NullPointerException: expected cause>"),
-                                containsString("cause was <java.lang.NullPointerException: an unexpected cause>"),
-                                containsString("Stacktrace was: java.lang.IllegalArgumentException: Ack!"),
-                                containsString("Caused by: java.lang.NullPointerException: an unexpected cause")))},
+                        hasSingleFailureWithMessage(CoreMatchers
+                                .<String> allOf(
+                                        startsWith("\nExpected: ("),
+                                        containsString("exception with cause is <java.lang.NullPointerException: expected cause>"),
+                                        containsString("cause was <java.lang.NullPointerException: an unexpected cause>"),
+                                        containsString("Stacktrace was: java.lang.IllegalArgumentException: Ack!"),
+                                        containsString("Caused by: java.lang.NullPointerException: an unexpected cause"))) },
                 {
                         UseNoCustomMessage.class,
                         hasSingleFailureWithMessage("Expected test to throw an instance of java.lang.IllegalArgumentException") },
-                {
-                        UseCustomMessageWithoutPlaceHolder.class,
+                { UseCustomMessageWithoutPlaceHolder.class,
                         hasSingleFailureWithMessage(ARBITRARY_MESSAGE) },
                 {
                         UseCustomMessageWithPlaceHolder.class,
                         hasSingleFailureWithMessage(ARBITRARY_MESSAGE
-                                + " - an instance of java.lang.IllegalArgumentException") }
-        });
+                                + " - an instance of java.lang.IllegalArgumentException") } });
     }
 
     private final Class<?> classUnderTest;
 
     private final Matcher<EventCollector> matcher;
 
-    public ExpectedExceptionTest(Class<?> classUnderTest,
-            Matcher<EventCollector> matcher) {
+    public ExpectedExceptionTest(final Class<?> classUnderTest,
+            final Matcher<EventCollector> matcher) {
         this.classUnderTest = classUnderTest;
         this.matcher = matcher;
     }
 
     @Test
     public void runTestAndVerifyResult() {
-        EventCollector collector = new EventCollector();
-        JUnitCore core = new JUnitCore();
+        final EventCollector collector = new EventCollector();
+        final JUnitCore core = new JUnitCore();
         core.addListener(collector);
         core.run(classUnderTest);
         assertThat(collector, matcher);
@@ -252,7 +254,7 @@ public class ExpectedExceptionTest {
         }
     }
 
-    //https://github.com/junit-team/junit/pull/583
+    // https://github.com/junit-team/junit/pull/583
     public static class ExpectAssertionErrorWhichIsNotThrown {
         @Rule
         public ExpectedException thrown = none();
@@ -291,7 +293,8 @@ public class ExpectedExceptionTest {
 
         @Test
         public void throwExceptionWithMatchingCause() {
-            NullPointerException expectedCause = new NullPointerException("expected cause");
+            final NullPointerException expectedCause = new NullPointerException(
+                    "expected cause");
 
             thrown.expect(IllegalArgumentException.class);
             thrown.expectMessage("Ack!");
@@ -326,14 +329,15 @@ public class ExpectedExceptionTest {
             thrown.expectMessage("Ack!");
             thrown.expectCause(is(new NullPointerException("expected cause")));
 
-            throw new IllegalArgumentException("Ack!", new NullPointerException("an unexpected cause"));
+            throw new IllegalArgumentException("Ack!",
+                    new NullPointerException("an unexpected cause"));
         }
     }
-    
+
     public static class UseNoCustomMessage {
 
         @Rule
-        public ExpectedException thrown= ExpectedException.none();
+        public ExpectedException thrown = ExpectedException.none();
 
         @Test
         public void noThrow() {
@@ -357,7 +361,7 @@ public class ExpectedExceptionTest {
     public static class UseCustomMessageWithoutPlaceHolder {
 
         @Rule
-        public ExpectedException thrown= ExpectedException.none();
+        public ExpectedException thrown = ExpectedException.none();
 
         @Test
         public void noThrow() {
