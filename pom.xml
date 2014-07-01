@@ -332,7 +332,11 @@
                     </archive>
                 </configuration>
             </plugin>
+<<<<<<< Upstream, based on origin/master
 			<!-- CHECKSTYLE -->
+=======
+            			<!-- CHECKSTYLE -->
+>>>>>>> f0c9c43 Update pom.xml
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
