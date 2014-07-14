@@ -229,8 +229,8 @@ public class ExpectedException implements TestRule {
     private class ExpectedExceptionStatement extends Statement {
         private final Statement fNext;
 
-        public ExpectedExceptionStatement(Statement base) {
-            fNext = base;
+        public ExpectedExceptionStatement(Statement baseStatement) {
+            fNext = baseStatement;
         }
 
         @Override
