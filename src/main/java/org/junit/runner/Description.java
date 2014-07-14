@@ -10,19 +10,23 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A <code>Description</code> describes a test which is to be run or has been run. <code>Descriptions</code>
- * can be atomic (a single test) or compound (containing children tests). <code>Descriptions</code> are used
- * to provide feedback about the tests that are about to run (for example, the tree view
- * visible in many IDEs) or tests that have been run (for example, the failures view).
+ * A <code>Description</code> describes a test which is to be run or has been
+ * run. <code>Descriptions</code> can be atomic (a single test) or compound
+ * (containing children tests). <code>Descriptions</code> are used to provide
+ * feedback about the tests that are about to run (for example, the tree view
+ * visible in many IDEs) or tests that have been run (for example, the failures
+ * view).
  * <p>
- * <code>Descriptions</code> are implemented as a single class rather than a Composite because
- * they are entirely informational. They contain no logic aside from counting their tests.
+ * <code>Descriptions</code> are implemented as a single class rather than a
+ * Composite because they are entirely informational. They contain no logic
+ * aside from counting their tests.
  * <p>
- * In the past, we used the raw {@link junit.framework.TestCase}s and {@link junit.framework.TestSuite}s
- * to display the tree of tests. This was no longer viable in JUnit 4 because atomic tests no longer have
- * a superclass below {@link Object}. We needed a way to pass a class and name together. Description
- * emerged from this.
- *
+ * In the past, we used the raw {@link junit.framework.TestCase}s and
+ * {@link junit.framework.TestSuite}s to display the tree of tests. This was no
+ * longer viable in JUnit 4 because atomic tests no longer have a superclass
+ * below {@link Object}. We needed a way to pass a class and name together.
+ * Description emerged from this.
+ * 
  * @see org.junit.runner.Request
  * @see org.junit.runner.Runner
  * @since 4.0
@@ -34,94 +38,130 @@ public class Description implements Serializable {
             .compile("([\\s\\S]*)\\((.*)\\)");
 
     /**
-     * Create a <code>Description</code> named <code>name</code>.
-     * Generally, you will add children to this <code>Description</code>.
-     *
-     * @param name the name of the <code>Description</code>
-     * @param annotations meta-data about the test, for downstream interpreters
+     * Create a <code>Description</code> named <code>name</code>. Generally, you
+     * will add children to this <code>Description</code>.
+     * 
+     * @param name
+     *            the name of the <code>Description</code>
+     * @param annotations
+     *            meta-data about the test, for downstream interpreters
      * @return a <code>Description</code> named <code>name</code>
      */
-    public static Description createSuiteDescription(String name, Annotation... annotations) {
+    public static Description createSuiteDescription(final String name,
+            final Annotation... annotations) {
         return new Description(null, name, annotations);
     }
 
     /**
-     * Create a <code>Description</code> named <code>name</code>.
-     * Generally, you will add children to this <code>Description</code>.
-     *
-     * @param name the name of the <code>Description</code>
-     * @param uniqueId an arbitrary object used to define uniqueness (in {@link #equals(Object)}
-     * @param annotations meta-data about the test, for downstream interpreters
+     * Create a <code>Description</code> named <code>name</code>. Generally, you
+     * will add children to this <code>Description</code>.
+     * 
+     * @param name
+     *            the name of the <code>Description</code>
+     * @param uniqueId
+     *            an arbitrary object used to define uniqueness (in
+     *            {@link #equals(Object)}
+     * @param annotations
+     *            meta-data about the test, for downstream interpreters
      * @return a <code>Description</code> named <code>name</code>
      */
-    public static Description createSuiteDescription(String name, Serializable uniqueId, Annotation... annotations) {
+    public static Description createSuiteDescription(final String name,
+            final Serializable uniqueId, final Annotation... annotations) {
         return new Description(null, name, uniqueId, annotations);
     }
 
     /**
-     * Create a <code>Description</code> of a single test named <code>name</code> in the 'class' named
-     * <code>className</code>. Generally, this will be a leaf <code>Description</code>. This method is a better choice
-     * than {@link #createTestDescription(Class, String, Annotation...)} for test runners whose test cases are not
-     * defined in an actual Java <code>Class</code>.
-     *
-     * @param className the class name of the test
-     * @param name the name of the test (a method name for test annotated with {@link org.junit.Test})
-     * @param annotations meta-data about the test, for downstream interpreters
+     * Create a <code>Description</code> of a single test named
+     * <code>name</code> in the 'class' named <code>className</code>. Generally,
+     * this will be a leaf <code>Description</code>. This method is a better
+     * choice than {@link #createTestDescription(Class, String, Annotation...)}
+     * for test runners whose test cases are not defined in an actual Java
+     * <code>Class</code>.
+     * 
+     * @param className
+     *            the class name of the test
+     * @param name
+     *            the name of the test (a method name for test annotated with
+     *            {@link org.junit.Test})
+     * @param annotations
+     *            meta-data about the test, for downstream interpreters
      * @return a <code>Description</code> named <code>name</code>
      */
-    public static Description createTestDescription(String className, String name, Annotation... annotations) {
-        return new Description(null, formatDisplayName(name, className), annotations);
+    public static Description createTestDescription(final String className,
+            final String name, final Annotation... annotations) {
+        return new Description(null, formatDisplayName(name, className),
+                annotations);
     }
 
     /**
-     * Create a <code>Description</code> of a single test named <code>name</code> in the class <code>clazz</code>.
-     * Generally, this will be a leaf <code>Description</code>.
-     *
-     * @param clazz the class of the test
-     * @param name the name of the test (a method name for test annotated with {@link org.junit.Test})
-     * @param annotations meta-data about the test, for downstream interpreters
+     * Create a <code>Description</code> of a single test named
+     * <code>name</code> in the class <code>clazz</code>. Generally, this will
+     * be a leaf <code>Description</code>.
+     * 
+     * @param clazz
+     *            the class of the test
+     * @param name
+     *            the name of the test (a method name for test annotated with
+     *            {@link org.junit.Test})
+     * @param annotations
+     *            meta-data about the test, for downstream interpreters
      * @return a <code>Description</code> named <code>name</code>
      */
-    public static Description createTestDescription(Class<?> clazz, String name, Annotation... annotations) {
-        return new Description(clazz, formatDisplayName(name, clazz.getName()), annotations);
+    public static Description createTestDescription(final Class<?> clazz,
+            final String name, final Annotation... annotations) {
+        return new Description(clazz, formatDisplayName(name, clazz.getName()),
+                annotations);
     }
 
     /**
-     * Create a <code>Description</code> of a single test named <code>name</code> in the class <code>clazz</code>.
-     * Generally, this will be a leaf <code>Description</code>.
-     * (This remains for binary compatibility with clients of JUnit 4.3)
-     *
-     * @param clazz the class of the test
-     * @param name the name of the test (a method name for test annotated with {@link org.junit.Test})
+     * Create a <code>Description</code> of a single test named
+     * <code>name</code> in the class <code>clazz</code>. Generally, this will
+     * be a leaf <code>Description</code>. (This remains for binary
+     * compatibility with clients of JUnit 4.3)
+     * 
+     * @param clazz
+     *            the class of the test
+     * @param name
+     *            the name of the test (a method name for test annotated with
+     *            {@link org.junit.Test})
      * @return a <code>Description</code> named <code>name</code>
      */
-    public static Description createTestDescription(Class<?> clazz, String name) {
+    public static Description createTestDescription(final Class<?> clazz,
+            final String name) {
         return new Description(clazz, formatDisplayName(name, clazz.getName()));
     }
 
     /**
-     * Create a <code>Description</code> of a single test named <code>name</code> in the class <code>clazz</code>.
-     * Generally, this will be a leaf <code>Description</code>.
-     *
-     * @param name the name of the test (a method name for test annotated with {@link org.junit.Test})
+     * Create a <code>Description</code> of a single test named
+     * <code>name</code> in the class <code>clazz</code>. Generally, this will
+     * be a leaf <code>Description</code>.
+     * 
+     * @param name
+     *            the name of the test (a method name for test annotated with
+     *            {@link org.junit.Test})
      * @return a <code>Description</code> named <code>name</code>
      */
-    public static Description createTestDescription(String className, String name, Serializable uniqueId) {
-        return new Description(null, formatDisplayName(name, className), uniqueId);
+    public static Description createTestDescription(final String className,
+            final String name, final Serializable uniqueId) {
+        return new Description(null, formatDisplayName(name, className),
+                uniqueId);
     }
 
-    private static String formatDisplayName(String name, String className) {
+    private static String formatDisplayName(final String name,
+            final String className) {
         return String.format("%s(%s)", name, className);
     }
 
     /**
      * Create a <code>Description</code> named after <code>testClass</code>
-     *
-     * @param testClass A {@link Class} containing tests
+     * 
+     * @param testClass
+     *            A {@link Class} containing tests
      * @return a <code>Description</code> of <code>testClass</code>
      */
-    public static Description createSuiteDescription(Class<?> testClass) {
-        return new Description(testClass, testClass.getName(), testClass.getAnnotations());
+    public static Description createSuiteDescription(final Class<?> testClass) {
+        return new Description(testClass, testClass.getName(),
+                testClass.getAnnotations());
     }
 
     /**
@@ -131,27 +171,34 @@ public class Description implements Serializable {
 
     /**
      * Describes a step in the test-running mechanism that goes so wrong no
-     * other description can be used (for example, an exception thrown from a Runner's
-     * constructor
+     * other description can be used (for example, an exception thrown from a
+     * Runner's constructor
      */
-    public static final Description TEST_MECHANISM = new Description(null, "Test mechanism");
+    public static final Description TEST_MECHANISM = new Description(null,
+            "Test mechanism");
 
     private final Collection<Description> fChildren = new ConcurrentLinkedQueue<Description>();
-    private final String fDisplayName;
-    private final Serializable fUniqueId;
-    private final Annotation[] fAnnotations;
-    private volatile /* write-once */ Class<?> fTestClass;
 
-    private Description(Class<?> clazz, String displayName, Annotation... annotations) {
+    private final String fDisplayName;
+
+    private final Serializable fUniqueId;
+
+    private final Annotation[] fAnnotations;
+
+    private volatile/* write-once */Class<?> fTestClass;
+
+    private Description(final Class<?> clazz, final String displayName,
+            final Annotation... annotations) {
         this(clazz, displayName, displayName, annotations);
     }
 
-    private Description(Class<?> clazz, String displayName, Serializable uniqueId, Annotation... annotations) {
-        if ((displayName == null) || (displayName.length() == 0)) {
+    private Description(final Class<?> clazz, final String displayName,
+            final Serializable uniqueId, final Annotation... annotations) {
+        if (displayName == null || displayName.length() == 0) {
             throw new IllegalArgumentException(
                     "The display name must not be empty.");
         }
-        if ((uniqueId == null)) {
+        if (uniqueId == null) {
             throw new IllegalArgumentException(
                     "The unique id must not be null.");
         }
@@ -170,16 +217,17 @@ public class Description implements Serializable {
 
     /**
      * Add <code>Description</code> as a child of the receiver.
-     *
-     * @param description the soon-to-be child.
+     * 
+     * @param description
+     *            the soon-to-be child.
      */
-    public void addChild(Description description) {
+    public void addChild(final Description description) {
         fChildren.add(description);
     }
 
     /**
-     * Gets the copy of the children of this {@code Description}.
-     * Returns an empty list if there are no children.
+     * Gets the copy of the children of this {@code Description}. Returns an
+     * empty list if there are no children.
      */
     public ArrayList<Description> getChildren() {
         return new ArrayList<Description>(fChildren);
@@ -207,7 +255,7 @@ public class Description implements Serializable {
             return 1;
         }
         int result = 0;
-        for (Description child : fChildren) {
+        for (final Description child : fChildren) {
             result += child.testCount();
         }
         return result;
@@ -219,11 +267,11 @@ public class Description implements Serializable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (!(obj instanceof Description)) {
             return false;
         }
-        Description d = (Description) obj;
+        final Description d = (Description) obj;
         return fUniqueId.equals(d.fUniqueId);
     }
 
@@ -240,19 +288,19 @@ public class Description implements Serializable {
     }
 
     /**
-     * @return a copy of this description, with no children (on the assumption that some of the
-     *         children will be added back)
+     * @return a copy of this description, with no children (on the assumption
+     *         that some of the children will be added back)
      */
     public Description childlessCopy() {
         return new Description(fTestClass, fDisplayName, fAnnotations);
     }
 
     /**
-     * @return the annotation of type annotationType that is attached to this description node,
-     *         or null if none exists
+     * @return the annotation of type annotationType that is attached to this
+     *         description node, or null if none exists
      */
-    public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        for (Annotation each : fAnnotations) {
+    public <T extends Annotation> T getAnnotation(final Class<T> annotationType) {
+        for (final Annotation each : fAnnotations) {
             if (each.annotationType().equals(annotationType)) {
                 return annotationType.cast(each);
             }
@@ -268,44 +316,47 @@ public class Description implements Serializable {
     }
 
     /**
-     * @return If this describes a method invocation,
-     *         the class of the test instance.
+     * @return If this describes a method invocation, the class of the test
+     *         instance.
      */
     public Class<?> getTestClass() {
         if (fTestClass != null) {
             return fTestClass;
         }
-        String name = getClassName();
+        final String name = getClassName();
         if (name == null) {
             return null;
         }
         try {
-            fTestClass = Class.forName(name, false, getClass().getClassLoader());
+            fTestClass = Class
+                    .forName(name, false, getClass().getClassLoader());
             return fTestClass;
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             return null;
         }
     }
 
     /**
-     * @return If this describes a method invocation,
-     *         the name of the class of the test instance
+     * @return If this describes a method invocation, the name of the class of
+     *         the test instance
      */
     public String getClassName() {
-        return fTestClass != null ? fTestClass.getName() : methodAndClassNamePatternGroupOrDefault(2, toString());
+        return fTestClass != null ? fTestClass.getName()
+                : methodAndClassNamePatternGroupOrDefault(2, toString());
     }
 
     /**
-     * @return If this describes a method invocation,
-     *         the name of the method (or null if not)
+     * @return If this describes a method invocation, the name of the method (or
+     *         null if not)
      */
     public String getMethodName() {
         return methodAndClassNamePatternGroupOrDefault(1, null);
     }
 
-    private String methodAndClassNamePatternGroupOrDefault(int group,
-            String defaultString) {
-        Matcher matcher = METHOD_AND_CLASS_NAME_PATTERN.matcher(toString());
+    private String methodAndClassNamePatternGroupOrDefault(final int group,
+            final String defaultString) {
+        final Matcher matcher = METHOD_AND_CLASS_NAME_PATTERN
+                .matcher(toString());
         return matcher.matches() ? matcher.group(group) : defaultString;
     }
 }
