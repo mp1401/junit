@@ -78,13 +78,13 @@ public class Timeout implements TestRule {
      * Create a {@code Timeout} instance with the same fields as {@code t}
      * except for {@code fLookForStuckThread}.
      *
-     * @param t the {@code Timeout} instance to copy
+     * @param timeout the {@code Timeout} instance to copy
      * @param lookForStuckThread whether to look for a stuck thread
      * @since 4.12
      */
-    protected Timeout(Timeout t, boolean lookForStuckThread) {
-        fTimeout = t.fTimeout;
-        fTimeUnit = t.fTimeUnit;
+    protected Timeout(Timeout timeout, boolean lookForStuckThread) {
+        fTimeout = timeout.fTimeout;
+        fTimeUnit = timeout.fTimeUnit;
         fLookForStuckThread = lookForStuckThread;
     }
 
